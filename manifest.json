@@ -1,5 +1,5 @@
 {
-    "id": "obsidian-confluence",
+    "id": "obsidian-confluence-publish",
     "name": "Publish to Confluence",
     "version": "1.0.1",
     "minAppVersion": "0.12.0",
