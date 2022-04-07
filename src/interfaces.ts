@@ -14,6 +14,9 @@ export interface IConfluenceContent {
             representation: string
         }
     }
+    version: {
+        number: number
+    }
     _links: {
         base: string
         webui: string

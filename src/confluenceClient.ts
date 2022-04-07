@@ -37,7 +37,7 @@ export class ConfluenceClient {
         }
         console.info('response', response)
 
-        if (response.status !== 200) {
+        if (Math.floor(response.status / 100) !== 2) {
             console.log(response.headers)
             if (response.headers['content-type'].contains('json') && response.json && response.json.errorMessages) {
                 throw response.json.errorMessages.join('\n')
@@ -46,32 +46,61 @@ export class ConfluenceClient {
             }
         }
 
-        return response.json
+        return response.json || response.text
     }
 
-    async createPage(issue: string): Promise<IConfluenceContent> {
+    async createPage(page: IConfluenceContent): Promise<IConfluenceContent> {
         return await this.sendRequest(
             {
-                url: this.buildUrl(`/issue/${issue}`),
+                url: this.buildUrl(`/content`),
                 method: 'POST',
+                headers: this.buildHeaders(),
+                body: JSON.stringify(page),
+            }
+        )
+    }
+
+    async modifyPage(page: IConfluenceContent): Promise<IConfluenceContent> {
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/${page.id}`),
+                method: 'PUT',
+                headers: this.buildHeaders(),
+                body: JSON.stringify(page),
+            }
+        )
+    }
+
+    async readPage(pageId: string): Promise<IConfluenceContent> {
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/${pageId}`),
+                method: 'PUT',
                 headers: this.buildHeaders(),
             }
         )
     }
 
-    // async getSearchResults(query: string, max: number): Promise<IJiraSearchResults> {
-    //     const queryParameters = new URLSearchParams({
-    //         jql: query,
-    //         startAt: "0",
-    //         maxResults: max.toString(),
-    //     })
-    //     return await this.sendRequest(
-    //         {
-    //             url: this.buildUrl(`/search`, queryParameters),
-    //             method: 'GET',
-    //             headers: this.buildHeaders(),
-    //         }
-    //     )
-    // }
+    async readPageContent(pageId: string): Promise<IConfluenceContent> {
+        const queryParameters = new URLSearchParams({
+            expand: 'body.storage',
+        })
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/${pageId}`, queryParameters),
+                method: 'PUT',
+                headers: this.buildHeaders(),
+            }
+        )
+    }
 
+    async deletePage(pageId: string): Promise<void> {
+        await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/${pageId}`),
+                method: 'DELETE',
+                headers: this.buildHeaders(),
+            }
+        )
+    }
 }
