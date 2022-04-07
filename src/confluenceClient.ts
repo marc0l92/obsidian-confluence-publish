@@ -1,4 +1,5 @@
 import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian'
+import { IConfluenceContent } from './interfaces'
 import { EAuthenticationTypes, IConfluencePublishSettings } from "./settings"
 
 export class ConfluenceClient {
@@ -37,7 +38,7 @@ export class ConfluenceClient {
         console.info('response', response)
 
         if (response.status !== 200) {
-            // console.log(response.headers)
+            console.log(response.headers)
             if (response.headers['content-type'].contains('json') && response.json && response.json.errorMessages) {
                 throw response.json.errorMessages.join('\n')
             } else {
@@ -48,42 +49,29 @@ export class ConfluenceClient {
         return response.json
     }
 
-    async getIssue(issue: string): Promise<IConfluencePublish> {
+    async createPage(issue: string): Promise<IConfluenceContent> {
         return await this.sendRequest(
             {
                 url: this.buildUrl(`/issue/${issue}`),
-                method: 'GET',
+                method: 'POST',
                 headers: this.buildHeaders(),
             }
         )
     }
 
-    async getSearchResults(query: string, max: number): Promise<IJiraSearchResults> {
-        const queryParameters = new URLSearchParams({
-            jql: query,
-            startAt: "0",
-            maxResults: max.toString(),
-        })
-        return await this.sendRequest(
-            {
-                url: this.buildUrl(`/search`, queryParameters),
-                method: 'GET',
-                headers: this.buildHeaders(),
-            }
-        )
-    }
+    // async getSearchResults(query: string, max: number): Promise<IJiraSearchResults> {
+    //     const queryParameters = new URLSearchParams({
+    //         jql: query,
+    //         startAt: "0",
+    //         maxResults: max.toString(),
+    //     })
+    //     return await this.sendRequest(
+    //         {
+    //             url: this.buildUrl(`/search`, queryParameters),
+    //             method: 'GET',
+    //             headers: this.buildHeaders(),
+    //         }
+    //     )
+    // }
 
-    async updateStatusColorCache(status: string): Promise<void> {
-        if (status in this._settings.statusColorCache) {
-            return
-        }
-        const response = await this.sendRequest(
-            {
-                url: this.buildUrl(`/status/${status}`),
-                method: 'GET',
-                headers: this.buildHeaders(),
-            }
-        )
-        this._settings.statusColorCache[status] = response.statusCategory.colorName
-    }
 }

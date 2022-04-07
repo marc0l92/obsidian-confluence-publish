@@ -1,44 +1,23 @@
-export interface IJiraIssue {
+export interface IConfluenceContent {
     id: string
-    key: string
-    fields: {
-        assignee: IJiraUser
-        created: string
-        creator: IJiraUser
-        description: string
-        duedate: string
-        issuetype: {
-            iconUrl: string
-            name: string
-        }
-        priority: {
-            iconUrl: string
-            name: string
-        }
-        reporter: IJiraUser
-        status: {
-            statusCategory: {
-                colorName: string
-            }
-            name: string
-            description: string
-        }
-        summary: string
-        updated: string
+    type: string
+    title: string
+    space: {
+        key: string
     }
-}
-
-interface IJiraUser {
-    active: boolean
-    displayName: string
-    self: string
-}
-
-export interface IJiraSearchResults {
-    issues: IJiraIssue[]
-    maxResults: number
-    startAt: number
-    total: number
+    ancestors: [{
+        id: string
+    }]
+    body: {
+        storage: {
+            value: string
+            representation: string
+        }
+    }
+    _links: {
+        base: string
+        webui: string
+    }
 }
 
 export function createProxy<T extends object>(obj: T): T {

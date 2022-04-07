@@ -21,13 +21,9 @@ export default class ConfluencePublishPlugin extends Plugin {
             await this.publishNotes()
         })
 
-        // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-
-
-        // This adds a complex command that can check whether the current state of the app allows execution of the command
         this.addCommand({
-            id: 'open-sample-modal-complex',
-            name: 'Open sample modal (complex)',
+            id: 'obsidian-confluence-publish-start',
+            name: 'Publish to Confluence',
             checkCallback: (checking: boolean) => {
                 // Conditions to check
                 const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView)
@@ -43,6 +39,8 @@ export default class ConfluencePublishPlugin extends Plugin {
                 }
             }
         })
+        // TODO: global command to open parent note in the space
+        // TODO: editor command to open the current note in confluence
     }
 
     async publishNotes() {
