@@ -1,11 +1,11 @@
-export interface IConfluenceContent {
-    id: string
+export interface IConfluencePage {
+    id?: string
     type: string
     title: string
     space: {
         key: string
     }
-    ancestors: [{
+    ancestors?: [{
         id: string
     }]
     body: {
@@ -14,13 +14,18 @@ export interface IConfluenceContent {
             representation: string
         }
     }
-    version: {
+    version?: {
         number: number
     }
-    _links: {
+    _links?: {
         base: string
         webui: string
     }
+}
+
+export interface IConfluenceSearchResult {
+    results: [IConfluencePage]
+    size: number
 }
 
 export function createProxy<T extends object>(obj: T): T {

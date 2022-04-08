@@ -1,5 +1,6 @@
-import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian'
-import { IConfluenceContent } from './interfaces'
+import { requestUrl, RequestUrlParam, RequestUrlResponse, TFile } from 'obsidian'
+import { version } from 'os'
+import { IConfluencePage, IConfluenceSearchResult } from './interfaces'
 import { EAuthenticationTypes, IConfluencePublishSettings } from "./settings"
 
 export class ConfluenceClient {
@@ -24,11 +25,15 @@ export class ConfluenceClient {
         } else if (this._settings.authenticationType === EAuthenticationTypes.BEARER_TOKEN) {
             requestHeaders['Authorization'] = `Bearer ${this._settings.bareToken}`
         }
+        requestHeaders['X-Atlassian-Token'] = 'no-check'
+        requestHeaders['User-Agent'] = 'obsidian-confluence-publish'
         return requestHeaders
     }
 
     private async sendRequest(options: RequestUrlParam): Promise<any> {
         let response: RequestUrlResponse
+        console.info('request', options)
+        options.contentType = 'application/json'
         try {
             response = await requestUrl(options)
         } catch (e) {
@@ -49,7 +54,44 @@ export class ConfluenceClient {
         return response.json || response.text
     }
 
-    async createPage(page: IConfluenceContent): Promise<IConfluenceContent> {
+    public buildNewPage(file: TFile, content: string): IConfluencePage {
+        const page: IConfluencePage = {
+            type: 'page',
+            title: file.name,
+            space: {
+                key: this._settings.space,
+            },
+            body: {
+                storage: {
+                    value: content,
+                    representation: 'storage',
+                    // representation: 'wiki',
+                }
+            }
+        }
+        if (this._settings.parentPage) {
+            page.ancestors = [{
+                id: this._settings.parentPage
+            }]
+        }
+        return page
+    }
+
+    public buildModifiedPage(page: IConfluencePage, content: string): IConfluencePage {
+        return Object.assign({}, page, {
+            body: {
+                storage: {
+                    value: content,
+                    representation: 'editor',
+                }
+            },
+            version:{
+                number: page.version.number + 1
+            }
+        })
+    }
+
+    async createPage(page: IConfluencePage): Promise<IConfluencePage> {
         return await this.sendRequest(
             {
                 url: this.buildUrl(`/content`),
@@ -60,7 +102,7 @@ export class ConfluenceClient {
         )
     }
 
-    async modifyPage(page: IConfluenceContent): Promise<IConfluenceContent> {
+    async modifyPage(page: IConfluencePage): Promise<IConfluencePage> {
         return await this.sendRequest(
             {
                 url: this.buildUrl(`/content/${page.id}`),
@@ -71,7 +113,7 @@ export class ConfluenceClient {
         )
     }
 
-    async readPage(pageId: string): Promise<IConfluenceContent> {
+    async readPage(pageId: string): Promise<IConfluencePage> {
         return await this.sendRequest(
             {
                 url: this.buildUrl(`/content/${pageId}`),
@@ -81,7 +123,7 @@ export class ConfluenceClient {
         )
     }
 
-    async readPageContent(pageId: string): Promise<IConfluenceContent> {
+    async readPageContent(pageId: string): Promise<IConfluencePage> {
         const queryParameters = new URLSearchParams({
             expand: 'body.storage',
         })
@@ -99,6 +141,22 @@ export class ConfluenceClient {
             {
                 url: this.buildUrl(`/content/${pageId}`),
                 method: 'DELETE',
+                headers: this.buildHeaders(),
+            }
+        )
+    }
+
+    async searchPage(pageName: string): Promise<IConfluenceSearchResult> {
+        const queryParameters = new URLSearchParams({
+            cql: `space="${this._settings.space}" AND type=page AND title="${pageName}"`,
+            expand: 'version',
+            start: '0',
+            limit: '1',
+        })
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/search`, queryParameters),
+                method: 'GET',
                 headers: this.buildHeaders(),
             }
         )
