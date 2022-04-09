@@ -1,5 +1,4 @@
-import { requestUrl, RequestUrlParam, RequestUrlResponse, TFile } from 'obsidian'
-import { version } from 'os'
+import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian'
 import { IConfluencePage, IConfluenceSearchResult } from './interfaces'
 import { EAuthenticationTypes, IConfluencePublishSettings } from "./settings"
 
@@ -52,43 +51,6 @@ export class ConfluenceClient {
         }
 
         return response.json || response.text
-    }
-
-    public buildNewPage(file: TFile, content: string): IConfluencePage {
-        const page: IConfluencePage = {
-            type: 'page',
-            title: file.name,
-            space: {
-                key: this._settings.space,
-            },
-            body: {
-                storage: {
-                    value: content,
-                    representation: 'storage',
-                    // representation: 'wiki',
-                }
-            }
-        }
-        if (this._settings.parentPage) {
-            page.ancestors = [{
-                id: this._settings.parentPage
-            }]
-        }
-        return page
-    }
-
-    public buildModifiedPage(page: IConfluencePage, content: string): IConfluencePage {
-        return Object.assign({}, page, {
-            body: {
-                storage: {
-                    value: content,
-                    representation: 'editor',
-                }
-            },
-            version:{
-                number: page.version.number + 1
-            }
-        })
     }
 
     async createPage(page: IConfluencePage): Promise<IConfluencePage> {
@@ -146,7 +108,7 @@ export class ConfluenceClient {
         )
     }
 
-    async searchPage(pageName: string): Promise<IConfluenceSearchResult> {
+    async searchPageByTitle(pageName: string): Promise<IConfluenceSearchResult> {
         const queryParameters = new URLSearchParams({
             cql: `space="${this._settings.space}" AND type=page AND title="${pageName}"`,
             expand: 'version',
