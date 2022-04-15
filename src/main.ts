@@ -1,4 +1,4 @@
-import { MarkdownView, Notice, Plugin } from 'obsidian'
+import { Editor, MarkdownView, Notice, Plugin } from 'obsidian'
 import { ConfluenceClient } from './confluenceClient'
 import { NotesPublisher } from './notesPublisher'
 import { ConfluencePublishSettingsTab } from './settings'
@@ -55,9 +55,20 @@ export default class ConfluencePublishPlugin extends Plugin {
                 }
             }
         })
-        // TODO: global command to open parent note in the space
-        // TODO: editor command to open the current note in confluence
-        // TODO: create option for a disclamer at the begin/end of the page saying that his page is generated automatically
+        this.addCommand({
+            id: 'obsidian-confluence-publish-open-parent',
+            name: 'Open published notes root in Confluence',
+            callback: () => {
+                // TODO: global command to open parent note in the space
+            }
+        })
+        this.addCommand({
+            id: 'obsidian-confluence-publish-open-note',
+            name: 'Open this note in Confluence',
+            editorCallback: (editor: Editor, view: MarkdownView) => {
+                // TODO: editor command to open the current note in confluence
+            }
+        })
         // TODO: Test markdown to HTML conversion
         // TODO: Create custom converters to generate custom HTML based on the markdown content
     }

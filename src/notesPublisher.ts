@@ -36,7 +36,7 @@ export class NotesPublisher {
             },
             body: {
                 storage: {
-                    value: content,
+                    value: this._settings.noteHeader + content,
                     representation: 'storage',
                     // representation: 'wiki',
                 }
@@ -54,7 +54,7 @@ export class NotesPublisher {
         return Object.assign({}, page, {
             body: {
                 storage: {
-                    value: content,
+                    value: this._settings.noteHeader + content,
                     representation: 'editor',
                 }
             },
@@ -73,7 +73,7 @@ export class NotesPublisher {
             },
             body: {
                 storage: {
-                    value: this._settings.folderBodyContent,
+                    value: this._settings.noteHeader + this._settings.folderBodyContent,
                     representation: 'storage',
                 }
             }

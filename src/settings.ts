@@ -23,6 +23,7 @@ export interface IConfluencePublishSettings {
     parentPageId: string
     folderBodyContent: string
     deleteBeforePublish: boolean
+    noteHeader: string
     label: string
 }
 
@@ -34,7 +35,8 @@ const DEFAULT_SETTINGS: IConfluencePublishSettings = {
     space: '',
     parentPageId: '',
     folderBodyContent: '<ac:structured-macro ac:name="children" ac:macro-id="bd02defc-cdb5-4a68-bbce-c3a43f6e0d78" />',
-    deleteBeforePublish: true,
+    deleteBeforePublish: false,
+    noteHeader: 'This page has been generated automatically. Please don\'t modify it.\n\n',
     label: 'obsidian-confluence-publish',
 }
 
@@ -143,10 +145,18 @@ export class ConfluencePublishSettingsTab extends PluginSettingTab {
             .setName('Folder body content')
             .setDesc('Confluence creates folders as pages with a content. Use this setting to define the content of the pages created to represent folders.')
             .addTextArea(text => text
-                // .setPlaceholder('')
                 .setValue(this._data.folderBodyContent)
                 .onChange(async (value) => {
                     this._data.folderBodyContent = value.trim()
+                    await this.saveSettings()
+                }))
+        new Setting(containerEl)
+            .setName('Note header')
+            .setDesc('The content of this setting we be put at the begin of each note published. The goal of this field is to define a disclaimer that inform the readers to not modify the page because it will be regenerated automatically.')
+            .addTextArea(text => text
+                .setValue(this._data.noteHeader)
+                .onChange(async (value) => {
+                    this._data.noteHeader = value
                     await this.saveSettings()
                 }))
         new Setting(containerEl)
