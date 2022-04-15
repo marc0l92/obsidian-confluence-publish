@@ -94,8 +94,8 @@ export class NotesPublisher {
 
     private async getParentPage(folder: TFolder): Promise<string> {
         if (!folder.name) {
-            if (this._settings.parentPage) {
-                return this._settings.parentPage
+            if (this._settings.parentPageId) {
+                return this._settings.parentPageId
             }
             return null
         }

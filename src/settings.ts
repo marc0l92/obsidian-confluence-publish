@@ -20,9 +20,9 @@ export interface IConfluencePublishSettings {
     bareToken?: string
     apiBasePath: string
     space: string
-    parentPage: string
-    folderBodyContent: string // TODO: create setting
-    label: string // TODO: create setting
+    parentPageId: string
+    folderBodyContent: string
+    label: string
 }
 
 const DEFAULT_SETTINGS: IConfluencePublishSettings = {
@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS: IConfluencePublishSettings = {
     apiBasePath: '/rest/api',
     password: '********',
     space: '',
-    parentPage: '',
+    parentPageId: '',
     folderBodyContent: '<ac:structured-macro ac:name="children" ac:macro-id="bd02defc-cdb5-4a68-bbce-c3a43f6e0d78" />',
     label: 'obsidian-confluence-publish',
 }
@@ -122,7 +122,38 @@ export class ConfluencePublishSettingsTab extends PluginSettingTab {
                 .setPlaceholder('~username')
                 .setValue(this._data.space)
                 .onChange(async (value) => {
-                    this._data.space = value
+                    this._data.space = value.trim()
+                    await this.saveSettings()
+                }))
+        new Setting(containerEl)
+            .setName('Parent Page Id')
+            .setDesc('Id of the page that will be used as ancestor for all the notes published. Keep the field empty to use the root of the space.')
+            .addText(text => text
+                .setPlaceholder('Root page of the space')
+                .setValue(this._data.parentPageId)
+                .onChange(async (value) => {
+                    this._data.parentPageId = value.trim()
+                    await this.saveSettings()
+                }))
+        containerEl.createEl('h2', { text: 'Other' })
+        new Setting(containerEl)
+            .setName('Folder body content')
+            .setDesc('Confluence creates folders as pages with a content. Use this setting to define the content of the pages created to represent folders.')
+            .addTextArea(text => text
+                // .setPlaceholder('')
+                .setValue(this._data.folderBodyContent)
+                .onChange(async (value) => {
+                    this._data.folderBodyContent = value.trim()
+                    await this.saveSettings()
+                }))
+        new Setting(containerEl)
+            .setName('Notes label')
+            .setDesc('Label to apply to all notes. This label will be used during the deletion process to identify all the notes created by this plugin')
+            .addText(text => text
+                .setPlaceholder('Default: obsidian-confluence-publish')
+                .setValue(this._data.label)
+                .onChange(async (value) => {
+                    this._data.label = value.trim() || DEFAULT_SETTINGS.label
                     await this.saveSettings()
                 }))
     }
