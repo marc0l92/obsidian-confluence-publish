@@ -50,7 +50,11 @@ export class ConfluenceClient {
             }
         }
 
-        return response.json || response.text
+        try {
+            return response.json
+        } catch (e) {
+            return response.text
+        }
     }
 
     async createPage(page: IConfluencePage): Promise<IConfluencePage> {
@@ -108,7 +112,7 @@ export class ConfluenceClient {
         )
     }
 
-    async searchPageByTitle(pageName: string): Promise<IConfluenceSearchResult> {
+    async searchPagesByTitle(pageName: string): Promise<IConfluenceSearchResult> {
         const queryParameters = new URLSearchParams({
             cql: `space="${this._settings.space}" AND type=page AND title="${pageName}"`,
             expand: 'version',
@@ -120,6 +124,36 @@ export class ConfluenceClient {
                 url: this.buildUrl(`/content/search`, queryParameters),
                 method: 'GET',
                 headers: this.buildHeaders(),
+            }
+        )
+    }
+
+    async searchPagesByLabel(label: string): Promise<IConfluenceSearchResult> {
+        const queryParameters = new URLSearchParams({
+            cql: `space="${this._settings.space}" AND type=page AND label="${label}"`,
+            // expand: 'version',
+            start: '0',
+            limit: '1',
+        })
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/search`, queryParameters),
+                method: 'GET',
+                headers: this.buildHeaders(),
+            }
+        )
+    }
+
+    async addLabelToPage(pageId: string, label: string): Promise<void> {
+        return await this.sendRequest(
+            {
+                url: this.buildUrl(`/content/${pageId}/label`),
+                method: 'POST',
+                headers: this.buildHeaders(),
+                body: JSON.stringify({
+                    prefix: 'global',
+                    name: label,
+                }),
             }
         )
     }

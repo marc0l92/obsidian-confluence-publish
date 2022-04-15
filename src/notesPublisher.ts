@@ -42,7 +42,7 @@ export class NotesPublisher {
                 }
             }
         }
-        if (parentPage) { // TODO: test
+        if (parentPage) {
             page.ancestors = [{
                 id: parentPage
             }]
@@ -73,12 +73,12 @@ export class NotesPublisher {
             },
             body: {
                 storage: {
-                    value: 'This is a folder',
+                    value: this._settings.folderBodyContent,
                     representation: 'storage',
                 }
             }
         }
-        if (parentPage) { // TODO: test
+        if (parentPage) {
             page.ancestors = [{
                 id: parentPage
             }]
@@ -103,14 +103,40 @@ export class NotesPublisher {
             return this._cacheFoldersId[folder.name]
         }
 
-        const remotePage = await this._client.searchPageByTitle(folder.name)
+        const remotePage = await this._client.searchPagesByTitle(folder.name)
         if (remotePage.size > 0) {
             return remotePage.results[0].id
         }
 
         const parentPage = await this.getParentPage(folder.parent)
         const newFolder = await this._client.createPage(this.buildNewFolder(folder, parentPage))
+        await this._client.addLabelToPage(newFolder.id, this._settings.label)
         return newFolder.id
+    }
+
+    public async deleteNotes() {
+        let processed = 0
+        let pageInProgress: IConfluencePage = null
+        try {
+            new Notice('Start deleting from Confluence')
+            const pages = await this._client.searchPagesByLabel(this._settings.label)
+            this._totalFilesToPublish = pages.size
+
+            for (const page of pages.results) {
+                console.log('Deleting', page)
+                this.updateStatusBar(processed++)
+                pageInProgress = page
+
+                await this._client.deletePage(page.id)
+            }
+            this.updateStatusBar(processed)
+
+            new Notice('Deleting completed')
+        } catch (error) {
+            console.error('Confluence Delete error:', { pageInProgress, error })
+            new Notice('Deleting failed')
+        }
+        setTimeout(() => this._statusBar.empty(), CLEAN_STATUS_BAR_DELAY)
     }
 
     public async publishNotes() {
@@ -130,9 +156,10 @@ export class NotesPublisher {
 
                 const parentPage = await this.getParentPage(file.parent)
 
-                const remotePage = await this._client.searchPageByTitle(file.basename)
+                const remotePage = await this._client.searchPagesByTitle(file.basename)
                 if (remotePage.size === 0) {
-                    await this._client.createPage(this.buildNewPage(file, content, parentPage))
+                    const newPage = await this._client.createPage(this.buildNewPage(file, content, parentPage))
+                    await this._client.addLabelToPage(newPage.id, this._settings.label)
                 } else {
                     await this._client.modifyPage(this.buildModifiedPage(remotePage.results[0], content))
                 }

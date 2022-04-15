@@ -1,4 +1,4 @@
-import { MarkdownView, Plugin } from 'obsidian'
+import { MarkdownView, Notice, Plugin } from 'obsidian'
 import { ConfluenceClient } from './confluenceClient'
 import { NotesPublisher } from './notesPublisher'
 import { ConfluencePublishSettingsTab } from './settings'
@@ -6,6 +6,7 @@ import { ConfluencePublishSettingsTab } from './settings'
 export default class ConfluencePublishPlugin extends Plugin {
     _settings: ConfluencePublishSettingsTab
     _notesPublisher: NotesPublisher
+    _isSyncing: boolean = false
 
     async onload() {
         this._settings = new ConfluencePublishSettingsTab(this.app, this)
@@ -14,23 +15,42 @@ export default class ConfluencePublishPlugin extends Plugin {
         this._notesPublisher = new NotesPublisher(this.app.vault, this.addStatusBarItem(), this._settings.getData())
 
         this.addRibbonIcon('cloud', 'Publish to Confluence', async (evt: MouseEvent) => {
+            if (this._isSyncing) {
+                new Notice('Syncing already on going')
+                return
+            }
+            this._isSyncing = true
             await this._notesPublisher.publishNotes()
+            this._isSyncing = false
         })
 
         this.addCommand({
             id: 'obsidian-confluence-publish-start',
             name: 'Publish to Confluence',
             checkCallback: (checking: boolean) => {
-                // Conditions to check
-                const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView)
-                if (markdownView) {
-                    // If checking is true, we're simply "checking" if the command can be run.
-                    // If checking is false, then we want to actually perform the operation.
+                if (!this._isSyncing) {
                     if (!checking) {
-                        // new SampleModal(this.app).open()
+                        this._isSyncing = true
+                        this._notesPublisher.publishNotes().finally(() => {
+                            this._isSyncing = false
+                        })
                     }
+                    return true
+                }
+            }
+        })
 
-                    // This command will only show up in Command Palette when the check function returns true
+        this.addCommand({
+            id: 'obsidian-confluence-publish-delete',
+            name: 'Delete published notes from Confluence',
+            checkCallback: (checking: boolean) => {
+                if (!this._isSyncing) {
+                    if (!checking) {
+                        this._isSyncing = true
+                        this._notesPublisher.deleteNotes().finally(() => {
+                            this._isSyncing = false
+                        })
+                    }
                     return true
                 }
             }

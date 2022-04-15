@@ -21,6 +21,8 @@ export interface IConfluencePublishSettings {
     apiBasePath: string
     space: string
     parentPage: string
+    folderBodyContent: string // TODO: create setting
+    label: string // TODO: create setting
 }
 
 const DEFAULT_SETTINGS: IConfluencePublishSettings = {
@@ -30,6 +32,8 @@ const DEFAULT_SETTINGS: IConfluencePublishSettings = {
     password: '********',
     space: '',
     parentPage: '',
+    folderBodyContent: '<ac:structured-macro ac:name="children" ac:macro-id="bd02defc-cdb5-4a68-bbce-c3a43f6e0d78" />',
+    label: 'obsidian-confluence-publish',
 }
 
 export class ConfluencePublishSettingsTab extends PluginSettingTab {
