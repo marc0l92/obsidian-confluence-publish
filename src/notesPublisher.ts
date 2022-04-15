@@ -14,12 +14,12 @@ export class NotesPublisher {
     _totalFilesToPublish: number = 0
     _cacheFoldersId: Record<string, string> = {}
 
-    public constructor(vault: Vault, statusBar: HTMLElement, settings: IConfluencePublishSettings) {
+    public constructor(vault: Vault, statusBar: HTMLElement, settings: IConfluencePublishSettings, client: ConfluenceClient) {
         this._vault = vault
         this._statusBar = statusBar
         this._settings = settings
+        this._client = client
 
-        this._client = new ConfluenceClient(this._settings)
         this._statusBar.empty()
     }
 
@@ -89,8 +89,8 @@ export class NotesPublisher {
     private async getNotes(): Promise<{ file: TFile, content: string }[]> {
         return await Promise.all(
             this._vault.getMarkdownFiles()
-            .filter(file => file.path.startsWith(this._settings.folderToPublish))
-            .map(async (file: TFile) => { return { file: file, content: await this._vault.cachedRead(file) } })
+                .filter(file => file.path.startsWith(this._settings.folderToPublish))
+                .map(async (file: TFile) => { return { file: file, content: await this._vault.cachedRead(file) } })
             // .filter((file, content) => content) // TODO: Filter based on the frontmatter settings
         )
     }

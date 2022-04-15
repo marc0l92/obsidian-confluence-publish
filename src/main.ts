@@ -6,13 +6,15 @@ import { ConfluencePublishSettingsTab } from './settings'
 export default class ConfluencePublishPlugin extends Plugin {
     _settings: ConfluencePublishSettingsTab
     _notesPublisher: NotesPublisher
+    _client: ConfluenceClient
     _isSyncing: boolean = false
 
     async onload() {
         this._settings = new ConfluencePublishSettingsTab(this.app, this)
         await this._settings.loadSettings()
         this.addSettingTab(this._settings)
-        this._notesPublisher = new NotesPublisher(this.app.vault, this.addStatusBarItem(), this._settings.getData())
+        this._client = new ConfluenceClient(this._settings.getData())
+        this._notesPublisher = new NotesPublisher(this.app.vault, this.addStatusBarItem(), this._settings.getData(), this._client)
 
         this.addRibbonIcon('cloud', 'Publish to Confluence', async (evt: MouseEvent) => {
             if (this._isSyncing) {
@@ -57,24 +59,31 @@ export default class ConfluencePublishPlugin extends Plugin {
         })
         this.addCommand({
             id: 'obsidian-confluence-publish-open-parent',
-            name: 'Open published notes root in Confluence',
+            name: 'Open published notes root',
             callback: () => {
-                // TODO: global command to open parent note in the space
+                window.open(this._settings.getData().host + '/spaces/' + this._settings.getData().space + '/pages/' + this._settings.getData().parentPageId)
             }
         })
         this.addCommand({
             id: 'obsidian-confluence-publish-open-note',
             name: 'Open this note in Confluence',
-            editorCallback: (editor: Editor, view: MarkdownView) => {
-                // TODO: editor command to open the current note in confluence
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const currentPage = await this._client.searchPagesByTitle(view.file.basename)
+                if (currentPage.size > 0) {
+                    window.open(this._settings.getData().host + '/spaces/' + this._settings.getData().space + '/pages/' + currentPage.results[0].id)
+                } else {
+                    new Notice('This note is not published yet')
+                }
             }
         })
         // TODO: Test markdown to HTML conversion
         // TODO: Create custom converters to generate custom HTML based on the markdown content
+        // TODO: handle notes with the same name
     }
 
     onunload() {
         this._settings = null
         this._notesPublisher = null
+        this._client = null
     }
 }
