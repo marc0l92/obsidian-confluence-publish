@@ -1,10 +1,10 @@
 {
-    "id": "obsidian-confluence-publish",
-    "name": "Publish to Confluence",
-    "version": "1.0.1",
-    "minAppVersion": "0.12.0",
-    "description": "Publish your Obsidian vault to Confluence",
-    "author": "marc0l92",
-    "authorUrl": "https://github.com/marc0l92",
-    "isDesktopOnly": false
+	"id": "obsidian-confluence-publish",
+	"name": "Publish to Confluence",
+	"version": "1.1.0",
+	"minAppVersion": "0.12.0",
+	"description": "Publish your Obsidian vault to Confluence",
+	"author": "marc0l92",
+	"authorUrl": "https://github.com/marc0l92",
+	"isDesktopOnly": false
 }
