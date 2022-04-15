@@ -25,6 +25,8 @@ export interface IConfluencePublishSettings {
     deleteBeforePublish: boolean
     noteHeader: string
     label: string
+    folderToPublish: string
+    frontmatterToPublish: string
 }
 
 const DEFAULT_SETTINGS: IConfluencePublishSettings = {
@@ -38,6 +40,8 @@ const DEFAULT_SETTINGS: IConfluencePublishSettings = {
     deleteBeforePublish: false,
     noteHeader: 'This page has been generated automatically. Please don\'t modify it.\n\n',
     label: 'obsidian-confluence-publish',
+    folderToPublish: '',
+    frontmatterToPublish: '',
 }
 
 export class ConfluencePublishSettingsTab extends PluginSettingTab {
@@ -166,6 +170,26 @@ export class ConfluencePublishSettingsTab extends PluginSettingTab {
                 .setValue(this._data.deleteBeforePublish)
                 .onChange(async (value) => {
                     this._data.deleteBeforePublish = value
+                    await this.saveSettings()
+                }))
+        new Setting(containerEl)
+            .setName('Folder of notes to publish')
+            .setDesc('Path to the folder of notes to publish. Keep it empty to publish all notes.')
+            .addText(text => text
+                .setPlaceholder('Empty: All folders')
+                .setValue(this._data.folderToPublish)
+                .onChange(async (value) => {
+                    this._data.folderToPublish = value.trim()
+                    await this.saveSettings()
+                }))
+        new Setting(containerEl)
+            .setName('Frontmatter to publish')
+            .setDesc('Name of the frontmatter field that identify the notes that needs to be published. Keep it empty to publish all notes.')
+            .addText(text => text
+                .setPlaceholder('Empty: All notes')
+                .setValue(this._data.frontmatterToPublish)
+                .onChange(async (value) => {
+                    this._data.frontmatterToPublish = value.trim() || DEFAULT_SETTINGS.label
                     await this.saveSettings()
                 }))
 

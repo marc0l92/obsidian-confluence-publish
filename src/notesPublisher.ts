@@ -88,7 +88,10 @@ export class NotesPublisher {
 
     private async getNotes(): Promise<{ file: TFile, content: string }[]> {
         return await Promise.all(
-            this._vault.getMarkdownFiles().map(async (file: TFile) => { return { file: file, content: await this._vault.cachedRead(file) } })
+            this._vault.getMarkdownFiles()
+            .filter(file => file.path.startsWith(this._settings.folderToPublish))
+            .map(async (file: TFile) => { return { file: file, content: await this._vault.cachedRead(file) } })
+            // .filter((file, content) => content) // TODO: Filter based on the frontmatter settings
         )
     }
 
