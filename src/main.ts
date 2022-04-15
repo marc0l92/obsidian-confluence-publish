@@ -57,7 +57,6 @@ export default class ConfluencePublishPlugin extends Plugin {
         })
         // TODO: global command to open parent note in the space
         // TODO: editor command to open the current note in confluence
-        // TODO: create an option to delete or not all the notes in that folder before doing the sync
         // TODO: create option for a disclamer at the begin/end of the page saying that his page is generated automatically
         // TODO: Test markdown to HTML conversion
         // TODO: Create custom converters to generate custom HTML based on the markdown content

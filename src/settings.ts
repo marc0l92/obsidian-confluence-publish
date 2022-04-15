@@ -22,6 +22,7 @@ export interface IConfluencePublishSettings {
     space: string
     parentPageId: string
     folderBodyContent: string
+    deleteBeforePublish: boolean
     label: string
 }
 
@@ -33,6 +34,7 @@ const DEFAULT_SETTINGS: IConfluencePublishSettings = {
     space: '',
     parentPageId: '',
     folderBodyContent: '<ac:structured-macro ac:name="children" ac:macro-id="bd02defc-cdb5-4a68-bbce-c3a43f6e0d78" />',
+    deleteBeforePublish: true,
     label: 'obsidian-confluence-publish',
 }
 
@@ -135,7 +137,8 @@ export class ConfluencePublishSettingsTab extends PluginSettingTab {
                     this._data.parentPageId = value.trim()
                     await this.saveSettings()
                 }))
-        containerEl.createEl('h2', { text: 'Other' })
+
+        containerEl.createEl('h2', { text: 'Publishing' })
         new Setting(containerEl)
             .setName('Folder body content')
             .setDesc('Confluence creates folders as pages with a content. Use this setting to define the content of the pages created to represent folders.')
@@ -146,6 +149,17 @@ export class ConfluencePublishSettingsTab extends PluginSettingTab {
                     this._data.folderBodyContent = value.trim()
                     await this.saveSettings()
                 }))
+        new Setting(containerEl)
+            .setName('Delete notes before publishing')
+            .setDesc('Delete all the notes from confluence before doing the publishing. This allows to clean renamed or deleted notes.')
+            .addToggle(text => text
+                .setValue(this._data.deleteBeforePublish)
+                .onChange(async (value) => {
+                    this._data.deleteBeforePublish = value
+                    await this.saveSettings()
+                }))
+
+        containerEl.createEl('h2', { text: 'Advanced' })
         new Setting(containerEl)
             .setName('Notes label')
             .setDesc('Label to apply to all notes. This label will be used during the deletion process to identify all the notes created by this plugin')

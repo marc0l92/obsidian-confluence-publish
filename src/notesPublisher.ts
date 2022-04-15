@@ -141,6 +141,9 @@ export class NotesPublisher {
     }
 
     public async publishNotes() {
+        if (this._settings.deleteBeforePublish) {
+            await this.deleteNotes()
+        }
         let processed = 0
         let fileInProgress: TFile = null
         this._cacheFoldersId = {}
