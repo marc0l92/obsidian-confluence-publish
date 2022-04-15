@@ -40,6 +40,7 @@ export default class ConfluencePublishPlugin extends Plugin {
         // TODO: editor command to open the current note in confluence
         // TODO: create an option to delete or not all the notes in that folder before doing the sync
         // TODO: create option for a disclamer at the begin/end of the page saying that his page is generated automatically
+        // TODO: settings to define the content of the folder notes
     }
 
     onunload() {
