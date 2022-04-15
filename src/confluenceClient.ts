@@ -131,9 +131,7 @@ export class ConfluenceClient {
     async searchPagesByLabel(label: string): Promise<IConfluenceSearchResult> {
         const queryParameters = new URLSearchParams({
             cql: `space="${this._settings.space}" AND type=page AND label="${label}"`,
-            // expand: 'version',
             start: '0',
-            limit: '1',
         })
         return await this.sendRequest(
             {

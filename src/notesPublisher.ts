@@ -111,6 +111,7 @@ export class NotesPublisher {
         const parentPage = await this.getParentPage(folder.parent)
         const newFolder = await this._client.createPage(this.buildNewFolder(folder, parentPage))
         await this._client.addLabelToPage(newFolder.id, this._settings.label)
+        this._cacheFoldersId[folder.name] = newFolder.id
         return newFolder.id
     }
 
