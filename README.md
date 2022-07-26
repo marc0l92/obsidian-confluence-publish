@@ -1,6 +1,6 @@
 # Obsidian confluence publish
 
-> [!Warning] Work in Progress
+## Warning: Work in Progress
 > This plugin is just a prove of concept to check if it is possible to publish Obsidian.md notes to Confluence.
 > The plugin is not ready yet and it will be once I put it in the official community plugin page of Obsidian.md.
 > In the meantime if you are interested to the this plugin, let me know by clicking on the GitHub Star button or by opening issues to suggest functionalities and requirements.
